@@ -1,0 +1,334 @@
+html{
+    height: 100%;
+  }
+  
+body {
+    font-family:Trebuchet MS;
+    margin: 0;
+    background-image: url('');
+    background-color: #eeeeee;
+    background-size: cover;
+    height: 100vh;
+    padding:0;
+    margin:0;
+}
+
+.no-scroll {
+    overflow: hidden;
+}
+
+.bg-img {
+    background-image: url('img/Honda_Background.jpg');
+    filter: blur(8px);
+    -webkit-filter: blur(8px);
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.bg-text {
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: 80%;
+    padding: 20px;
+    text-align: center;
+}
+
+.adm-bg-text {
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    padding: 20px;
+    text-align: center;
+}
+
+.login-logo-vision {
+    margin: 130px 30px; 
+}
+
+.frame {
+    background-color:white;
+    opacity: 0.95;
+    border-radius: 5px;
+    margin: 130px 30px;
+    width: 400px;
+    padding: 50px 30px 50px 30px;
+    box-shadow: 10px 10px 1px grey;
+}
+
+.adm-frame {
+    background-color:rgb(45, 45, 45);
+    opacity: 0.95;
+    border-radius: 5px;
+    margin: 130px 30px;
+    width: 400px;
+    padding: 50px 30px 50px 30px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 1), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.field {
+    margin-bottom: 13px;
+}
+
+.logo-text {
+    color: red;
+    width: 70%;
+    position: relative;
+    left: 13%;
+    right: 17%;
+    text-align: center;
+}
+
+.login-logo {
+    margin-right: 5px;
+    padding: 30px 0 40px 0;
+    width: 200px;
+}
+
+.btn-login{
+    border: none;
+    background-color: #c90a0a;
+    color: white;
+    padding: 14px 100px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.adm-btn-login{
+    background-color: lightgrey;
+    color: black;
+    padding: 14px 100px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.adm-btn-login:hover {
+    background-color: grey;
+    color: white;
+}
+
+.btn-car-model {
+    border: none;
+    background-color: #020220;
+    color: white;
+    padding: 14px 60px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.hover-container {
+    position: relative;
+}
+
+.hover-container b {
+    position: relative;
+}
+
+.overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    background-color: #9a1212;
+    overflow: hidden;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+    height:0;
+    transition: .5s;
+}
+
+.btn-car-model-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    background-color: #bd2601;
+    overflow: hidden;
+    color: #020220;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+    height:0;
+    transition: .5s;
+}
+  
+.hover-container:hover .overlay {
+    top: 0;
+    height: 100%;
+    padding: 14px 10px;
+    color: white;
+}
+
+.hover-container:hover .btn-car-model-overlay {
+    top: 0;
+    height: 100%;
+    padding: 14px 10px;
+    color: white;
+}
+
+.textbox {
+    border: 1px solid #666666;
+    border-radius: 5px;
+    outline: 0;
+    height: 35px;
+    width: 250px;
+}
+
+.adm-textbox {
+    border: 1px solid #666666;
+    outline: 0;
+    height: 40px;
+    width: 270px;
+}
+
+.btn-register{
+    border: none;
+    background-color: #47cdfe;
+    color: black;
+    padding: 14px 100px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    margin: 20px 0 0 0;
+    transition: .2s;
+    border: none;
+}
+
+.btn-register:hover {
+    text-decoration: none;
+    background-color: #080842;
+    color: white;
+}
+
+a:link {
+    font-size: 13px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+a {
+    color: grey; 
+}
+
+a:hover {
+    text-decoration: underline;
+    color: black;
+}
+
+.adm a:hover {
+    color: white;
+}
+
+hr {
+    margin: 0;
+    border-width: 3px;
+    color: black;
+}
+
+.car-model {
+    height: 219px;
+    width: auto;
+}
+
+.car-spec {
+    height: 100%;
+    width: 100%;
+}
+
+.main {
+    margin: 17px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: 1px;
+}
+
+.main h3 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 27px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.main p {
+    color: #292929;
+    letter-spacing: 0px;
+}
+
+.main b {
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.col {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    margin: 0 12px 0 12px;
+    padding: 1px;
+    font-weight: 600;
+}
+
+#grad {
+    background: linear-gradient(to right bottom, grey, white) no-repeat;
+}
+
+.btn-adm-selection {
+    width: 300px;
+    height: 300px;
+    margin: auto;
+    padding: auto;
+    background-color: rgb(45, 45, 45);
+    border-radius: 10px;
+}
+
+.btn-adm-selection:hover {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 1), 0 20px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+div.sticky {
+    position: sticky;
+    top: 0;
+}
+
+.row-shader {
+    border-radius: 3px;
+}
+
+.row-shader:hover {
+    transition: .2s;
+    background-color: #cbcbcb;
+}
+
+.admin tr:nth-child(even) {
+    background-color: #e9e7e7;
+}
+
+.admin p {
+    cursor: pointer;
+}
+

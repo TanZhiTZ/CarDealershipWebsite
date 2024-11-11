@@ -1,0 +1,118 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Bahnschrift SemiBold";
+    background-color: #eeeeee;
+}
+
+.container {
+    width: 100%;
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px #888;
+    max-width: fit-content;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    margin-right: 0px;
+    align-items: center;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="file"],
+input[type="submit"] {
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    width: 70%;
+    text-align: center;
+}
+
+input[type="submit"] {
+    background-color: #a81c40;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+input[type="submit"]:hover {
+    background-color: #cc0000;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #5a5c6f;
+}
+
+th,
+td {
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.container .table td {
+    padding: 1rem;
+    border-bottom: var(--border);
+}
+
+.text a {
+    font-size: 15px;
+    margin-bottom: 20px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-confirm {
+    font-family: "Lato", Arial, sans-serif;
+    display: block;
+    background: #0cc646;
+    color: #fff;
+    padding: 7px 33px;
+    border-radius: 4px;
+    border: #0cc646;
+    margin-top: 10px;
+    transition: 0.5s;
+}
+
+.btn-confirm:hover {
+    background-color: #9c9c9c;
+}
+
+.btn-edit {
+    font-family: "Lato", Arial, sans-serif;
+    display: block;
+    background: #f4c430;
+    color: #fff;
+    border: #f4c430;
+    padding: 7px 40px;
+    border-radius: 4px;
+    margin-top: 10px;
+    transition: 0.5s;
+}
+
+.btn-delete {
+    font-family: "Lato", Arial, sans-serif;
+    display: block;
+    background: #FF0000;
+    color: #fff;
+    padding: 7px 40px;
+    border-radius: 4px;
+    margin-top: 10px;
+    transition: 0.5s;
+}
+
+.btn-edit:hover {
+    background-color: #9c9c9c;
+}
+
+.btn-delete:hover {
+    background-color: #9c9c9c;
+}
