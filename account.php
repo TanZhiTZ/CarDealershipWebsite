@@ -1,47 +1,58 @@
 <?php
-include_once 'header2.php';
+include('header2.php');
 
 if (isset($_SESSION['user_name'])) {
-  $name = $_SESSION['user_name'];
-  $id = $_SESSION['user_id'];
+  $name = htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8');
+  $id = intval($_SESSION['user_id']);
+  echo $name;
+} else {
+  header('Location: accountVerifyError.php');
 }
 
-$user = mysqli_query($conn , "SELECT * FROM user WHERE user_id = '$id'");
-
+// Secure connection using prepared statements
+$stmt = $conn->prepare("SELECT * FROM user WHERE user_id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$user = $stmt->get_result();
 $row = mysqli_fetch_assoc($user);
-
+$stmt->close();
 
 if (isset($_POST['update'])) {
-    $user_name = $_SESSION['user_name'];
-    $email = $_POST['email'];
-    $password = md5($_POST['password']);
-    $cpassword = md5($_POST['confirm-password']);
-
-    if ($password == $cpassword) {
-        $update_data = "UPDATE user SET email='$email', password='$password' WHERE user_name = '$user_name'";
-        $update = mysqli_query($conn, $update_data);
-
-        if ($update) {
-            session_unset();
-            session_destroy();
-            echo "<script>alert('Account updated successfully. Please log in again.');</script>";
-            echo "<script>window.location.href = 'index.php';</script>";
-        } else {
-            echo "<script>alert('Failed to update account.');</script>";
-        }
+    // Sanitize and validate email
+    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "<script>alert('Invalid email format.');</script>";
     } else {
-        echo "<script>alert('Password not matched.');</script>";
+        // Sanitize and hash passwords
+        $password = htmlspecialchars(trim($_POST['password']));
+        $cpassword = htmlspecialchars(trim($_POST['confirm-password']));
+
+        if ($password === $cpassword) {
+            $hashed_password = md5($password);
+            
+            // Update user data with prepared statement to prevent SQL injection
+            $stmt = $conn->prepare("UPDATE user SET email=?, password=? WHERE user_name=?");
+            $stmt->bind_param("sss", $email, $hashed_password, $name);
+            $update = $stmt->execute();
+            $stmt->close();
+
+            if ($update) {
+                session_unset();
+                session_destroy();
+                echo "<script>alert('Account updated successfully. Please log in again.');</script>";
+                echo "<script>window.location.href = 'index.php';</script>";
+            } else {
+                echo "<script>alert('Failed to update account.');</script>";
+            }
+        } else {
+            echo "<script>alert('Passwords do not match.');</script>";
+        }
     }
 }
-    
-?>
-
 ?>
 
 <!DOCTYPE html>
-
 <html>
-    
 <head>
     <title>Account</title>
     <meta charset="UTF-8">
@@ -49,8 +60,6 @@ if (isset($_POST['update'])) {
     <link rel="stylesheet" type="text/css" href="css/main.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
-
 </head>
 
 <style>
@@ -125,35 +134,33 @@ body {
   color: white;
 
 }
-
 </style>
 
 <body>
     <div style="padding-top: 80px;">
-        <h1 style=" font-size: 28px; font-weight: bold; margin-bottom: 20px; text-align:center; padding: 20px;">Account Information</h1>
+        <h1 style="font-size: 28px; font-weight: bold; margin-bottom: 20px; text-align: center; padding: 20px;">Account Information</h1>
     </div>
 
-        <div class="user_details">
-            <h2 style="font-size: 20px; font-weight: bold; margin-top: 10px; margin-bottom: 30px;">User Details</h2>
-            <p><strong>Username:</strong> <?php echo $_SESSION['user_name']; ?></p>
-            <p><strong>Email:</strong> <?php echo $row['email']; ?></p>
-         </div>
-        
-        <div class="acc_settings">
-            <h2 style="font-size: 20px; font-weight: bold; margin-top: 10px; margin-bottom: 10px;">Update Account Settings</h2>        
-            <form action="" method="POST" enctype="multipart/form-data">
-              <label for="email">Email:</label>
-              <input type="email" id="email" name="email" value="<?php echo $row['email']; ?>" required>
-              <br>
-              <label for="password">Password:</label>
-              <input type="password" id="password" name="password" required>
-              <br>
-              <label for="confirm-password">Confirm Password:</label>
-              <input type="password" id="confirm-password" name="confirm-password" required>
-              <br>
-              <input type="submit" name="update" value="Update Account">
-            </form>
-        </div>
-        <br><br><br>
-    </body>
+    <div class="user_details">
+        <h2 style="font-size: 20px; font-weight: bold; margin-top: 10px; margin-bottom: 30px;">User Details</h2>
+        <p><strong>Username:</strong> <?php echo htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8'); ?></p>
+        <p><strong>Email:</strong> <?php echo htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8'); ?></p>
+    </div>
+
+    <div class="acc_settings">
+        <h2 style="font-size: 20px; font-weight: bold; margin-top: 10px; margin-bottom: 10px;">Update Account Settings</h2>        
+        <form action="" method="POST" enctype="multipart/form-data">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8'); ?>" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <label for="confirm-password">Confirm Password:</label>
+            <input type="password" id="confirm-password" name="confirm-password" required>
+            <br>
+            <input type="submit" name="update" value="Update Account">
+        </form>
+    </div>
+</body>
 </html>
