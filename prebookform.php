@@ -1,60 +1,51 @@
 <?php
 include_once 'header2.php';
 
+$variant = filter_input(INPUT_POST, 'variant', FILTER_SANITIZE_STRING);
+$color = filter_input(INPUT_POST, 'color', FILTER_SANITIZE_STRING);
+$model = filter_input(INPUT_POST, 'model', FILTER_SANITIZE_STRING);
 
-// if (isset($_SESSION['user_id'])) {
-//     $user_id = $_SESSION['user_id'];
-//     $name = $_SESSION['user_name'];
-// }
+if ($variant) {
+    $stmt = $conn->prepare("SELECT Price FROM specifications WHERE ModelType = ?");
+    $stmt->bind_param("s", $variant);
+    $stmt->execute();
+    $res = $stmt->get_result();
 
-?>
-
-<?php
-// $model = isset($_GET['model']) ? $_GET['model'] : null;
-// $variant = isset($_GET['variant']) ? $_GET['variant'] : die();
-// $color = isset($_GET['color']) ? $_GET['color'] : die();
-
-$variant = $_POST['variant'];
-$color = $_POST['color'];
-$model = $_POST['model'];
-
-$sql = "SELECT * FROM specifications WHERE ModelType='$variant'";
-$res = mysqli_query($conn, $sql);
-
-$count = mysqli_num_rows($res);
-
-if ($count > 0) {
-    while ($row = mysqli_fetch_assoc($res)) {
+    if ($res && $res->num_rows > 0) {
+        $row = $res->fetch_assoc();
         $price = $row['Price'];
-
+    } else {
+        echo "<p class='error-message'>Error: Model specification not found.</p>";
+        $price = 'N/A'; // Default if no price is found
     }
+    $stmt->close();
 }
-
 
 if (isset($_POST['book'])) {
-    //        $user_id = $_SESSION['users_id'];
-    //        $username = $_SESSION['name'];
-    $name_form = $_POST['form_name'];
-    $email = $_POST['email'];
-    $contact_no = $_POST['contact_no'];
-    $payment_method = $_POST['payment_method'];
-    $variant = $_POST['variant'];
-    $color = $_POST['color'];
-    $price = $_POST['price'];
+    $name_form = filter_input(INPUT_POST, 'form_name', FILTER_SANITIZE_STRING);
+    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+    $contact_no = filter_input(INPUT_POST, 'contact_no', FILTER_SANITIZE_NUMBER_INT);
+    $payment_method = filter_input(INPUT_POST, 'payment_method', FILTER_SANITIZE_STRING);
+    $variant = filter_input(INPUT_POST, 'variant', FILTER_SANITIZE_STRING);
+    $color = filter_input(INPUT_POST, 'color', FILTER_SANITIZE_STRING);
+    $price = filter_input(INPUT_POST, 'price', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    $name = filter_input(INPUT_POST, 'user_name', FILTER_SANITIZE_STRING);
+    $user_id = filter_input(INPUT_POST, 'user_id', FILTER_SANITIZE_NUMBER_INT);
     $date = date('Y-m-d');
-    $name = $_POST['user_name'];
-    $user_id = $_POST['user_id'];
 
-    $prebook = mysqli_query($conn, "INSERT INTO `prebook`(name, email, contact, paymentmethod, model, color, price, account, date, user_id) VALUES" . "('$name_form', '$email','$contact_no','$payment_method','$variant','$color','$price', '$name', '$date', '$user_id')") or die('query failed');
-    if ($prebook) {
-        echo "<script>alert('Prebook done'); window.location.href = 'index.php';</script>";
+    if ($email && preg_match("/^\d{10}$/", $contact_no)) {
+        $stmt = $conn->prepare("INSERT INTO prebook (name, email, contact, paymentmethod, model, color, price, account, date, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssdsis", $name_form, $email, $contact_no, $payment_method, $variant, $color, $price, $name, $date, $user_id);
+        if ($stmt->execute()) {
+            echo "<script>alert('Prebook done'); window.location.href = 'index.php';</script>";
+        } else {
+            echo "<p class='error-message'>Error: Unable to complete the booking. Please try again later.</p>";
+        }
+        $stmt->close();
+    } else {
+        echo "<p class='error-message'>Please provide valid email and contact number.</p>";
     }
 }
-;
-// } else {
-//     echo "User ID is not set in the session.";
-// }
-
 ?>
 
 <style>
@@ -306,65 +297,55 @@ if (isset($_POST['book'])) {
     </section>
 </body>
 
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="prebookform.js"></script>
 <script>
     function validateForm() {
-        // Get a reference to the checkbox element
         var checkbox1 = document.getElementById('checkbox1');
         var errorMessage1 = document.getElementById('error-message1');
 
         if (!checkbox1.checked) {
             errorMessage1.style.display = 'block';
             return false;
-
         } else {
             errorMessage1.style.display = 'none';
 
-            var phonePattern = /^\d{10}$/; // Assuming a 10-digit phone number
+            var phonePattern = /^\d{10}$/;
             var phoneFormat = document.getElementById('phoneno').value;
 
             if (!phonePattern.test(phoneFormat)) {
-                // Display an error message for phone number validation
                 alert("Please enter a valid phone number.");
                 return false;
             }
-
-           
             return true;
         }
     }
 
-    $("#apply").click(function() {
-    if ($('#promoCode').val() != '') {
-        $.ajax({
-            type: "POST",
-            url: "checkPromo.php",
-            data: {
-                coupon_code: $('#promoCode').val()
-            },
-            success: function(dataResult) {
-                var dataResult = JSON.parse(dataResult);
-                if (dataResult.statusCode == 200) {
-                    var after_apply = $('#price').val() - dataResult.value;
-                    $('#price').val(after_apply);
-                    document.getElementById('display_price').textContent = 'RM ' + after_apply.toFixed(2);
-                    $('#apply').hide();
-                    $('#promo-message').html("Promocode applied successfully !");
-                } else if (dataResult.statusCode == 201) {
-                    $('#promo-error-message').html("Invalid promotion code !");
+    $("#apply").click(function(e) {
+        e.preventDefault();
+        var promoCode = $('#promoCode').val().trim();
+        if (promoCode) {
+            $.ajax({
+                type: "POST",
+                url: "checkPromo.php",
+                data: { coupon_code: promoCode },
+                success: function(dataResult) {
+                    var dataResult = JSON.parse(dataResult);
+                    if (dataResult.statusCode == 200) {
+                        var after_apply = parseFloat($('#price').val()) - dataResult.value;
+                        $('#price').val(after_apply);
+                        document.getElementById('display_price').textContent = 'RM ' + after_apply.toFixed(2);
+                        $('#apply').hide();
+                        $('#promo-message').html("Promocode applied successfully!");
+                    } else if (dataResult.statusCode == 201) {
+                        $('#promo-error-message').html("Invalid promotion code!");
+                    }
                 }
-            }
-        });
-    } else {
-        $('#promo-error-message').html("Promotion code cannot be blank. Please Enter a Valid Promotion code !");
-    }
+            });
+        } else {
+            $('#promo-error-message').html("Promotion code cannot be blank. Please enter a valid code!");
+        }
     });
-
 </script>
 
-
-<?php
-include_once 'footer.php';
-?>
+<?php include_once 'footer.php'; ?>

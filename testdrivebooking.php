@@ -1,29 +1,45 @@
 <?php
 include_once 'header2.php';
-
-session_start();
 error_reporting(0);
 
 if (isset($_SESSION['user_id'])) {
 
-if (isset($_POST['book'])) {
- 
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $contact_no = $_POST['contact_no'];
-    $test_drive_model = $_POST['car_model'];
-    $preferred_date = $_POST['preferred_date'];
-    $preferred_time = $_POST['preferred_time'];
-    $user = $_SESSION['user_name'];
+    if (isset($_POST['book'])) {
+        // Sanitize and validate each input field
+        $name = filter_var(trim($_POST['name']), FILTER_SANITIZE_STRING);
+        $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
+        $contact_no = filter_var(trim($_POST['contact_no']), FILTER_SANITIZE_NUMBER_INT);
+        $test_drive_model = filter_var(trim($_POST['car_model']), FILTER_SANITIZE_STRING);
+        $preferred_date = filter_var(trim($_POST['preferred_date']), FILTER_SANITIZE_STRING);
+        $preferred_time = filter_var(trim($_POST['preferred_time']), FILTER_SANITIZE_STRING);
+        $user = $_SESSION['user_name'];
 
-    $reservation_query = mysqli_query($conn, "INSERT INTO `testdrive`(name, email, contact, testdrivemodel, preferreddate, preferredtime, user) VALUES" . "('$name', '$email','$contact_no','$test_drive_model','$preferred_date','$preferred_time','$user')") or die('query failed');
-    if ($reservation_query) {
-        echo "<script>alert('Your test drive request has been successfully submitted, and our dedicated Sales Advisor will be in touch with you very soon.'); window.location.href = 'index.php';</script>";
+        // Server-side validation
+        $errors = [];
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Please enter a valid email address.";
+        }
+        if (!preg_match('/^\d{10}$/', $contact_no)) {
+            $errors[] = "Please enter a valid 10-digit phone number.";
+        }
+        if (!DateTime::createFromFormat('Y-m-d', $preferred_date)) {
+            $errors[] = "Please select a valid date.";
+        }
+
+        // If no errors, process the form
+        if (empty($errors)) {
+            $reservation_query = mysqli_query($conn, "INSERT INTO `testdrive`(name, email, contact, testdrivemodel, preferreddate, preferredtime, user) VALUES ('$name', '$email','$contact_no','$test_drive_model','$preferred_date','$preferred_time','$user')") or die('Query failed.');
+            if ($reservation_query) {
+                echo "<script>alert('Your test drive request has been successfully submitted. Our dedicated Sales Advisor will be in touch.'); window.location.href = 'index.php';</script>";
+            }
+        } else {
+            // Display errors if any
+            foreach ($errors as $error) {
+                echo "<p class='error-message'>$error</p>";
+            }
+        }
     }
-}
-;
 } else {
-    echo "User ID is not set in the session.";
     echo "<script>alert('Please login first.'); window.location.href = 'login.php';</script>";
 }
 ?>
@@ -149,7 +165,7 @@ if (isset($_POST['book'])) {
 </style>
 
 <body>
-    <section style="padding-top:50px;">
+    <section style="padding-top:100px;">
         <div class="container">
             <h2>let's get in touch test driving</h2>
             <p style="margin-bottom:0px;">Kindly fill in your details below. All fields are required</p>
@@ -209,7 +225,7 @@ if (isset($_POST['book'])) {
                     <div class="col">
                         <label>Preferred Date <span style="color:red;">*</span><span style="color:#8c8c8c;">(Available
                                 for One Week Before the Test Drive)</span></label>
-                        <input type="date" class="prebook-input" name="preferred_date" min="yyyy-mm-dd" max="2023-12-30"
+                        <input type="date" class="prebook-input" name="preferred_date" min="yyyy-mm-dd" max="yyyy-mm-dd"
                             style="width: 100%;" required>
                     </div>
                     <div class="col">
@@ -277,11 +293,9 @@ if (isset($_POST['book'])) {
 </body>
 
 
-
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
     function validateForm() {
-        // Get a reference to the checkbox element
         var checkbox1 = document.getElementById('checkbox1');
         var checkbox2 = document.getElementById('checkbox2');
         var errorMessage1 = document.getElementById('error-message1');
@@ -295,63 +309,48 @@ if (isset($_POST['book'])) {
         }
 
         if (grecaptcha.getResponse() === "") {
-            errorDiv.innerHTML = "Please complete the reCAPTCHA to prove that you are not a robot.";
+            errorDiv.innerHTML = "Please complete the reCAPTCHA to prove you are not a robot.";
             errorDiv.style.display = 'block';
             return false;
         }
 
-        var phonePattern = /^\d{10}$/; // Assuming a 10-digit phone number
+        var phonePattern = /^\d{10}$/;
         var phoneFormat = document.getElementById('phoneno').value;
 
         if (!phonePattern.test(phoneFormat)) {
-            // Display an error message for phone number validation
             alert("Please enter a valid phone number.");
             return false;
         }
 
         return true;
-
-
     }
 
-    // Function to format the date in yyyy-mm-dd format
+    // Adjust date picker for "Preferred Date"
     function formatDate(date) {
         var dd = date.getDate();
-        var mm = date.getMonth() + 1; // January is 0
+        var mm = date.getMonth() + 1;
         var yyyy = date.getFullYear();
-
-        // Make the day and month format become 2 digits if they are less than 10
-        if (dd < 10) {
-            dd = '0' + dd;
-        }
-        if (mm < 10) {
-            mm = '0' + mm;
-        }
-
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
         return yyyy + '-' + mm + '-' + dd;
     }
 
-
-    // Set the minimum and maximum dates for check-in and check-out
     function setMinMaxDates() {
         var today = new Date();
-        today.setDate(today.getDate() + 7)
+        var nextMonth = new Date(today);
+        today.setDate(today.getDate() + 7); // Set minDate to one week from today
+
+        nextMonth.setMonth(today.getMonth() + 1); // Move to the same day next month for maxDate
         var minDate = formatDate(today);
+        var maxDate = formatDate(nextMonth);
 
-
-        // Set the minimum date for check-in
-        var checkInFields = document.querySelectorAll('.prebook-input');
-        checkInFields.forEach(function (field) {
+        document.querySelectorAll('input[name="preferred_date"]').forEach(function(field) {
             field.setAttribute('min', minDate);
-            field.setAttribute('max', '2023-12-30');
-
+            field.setAttribute('max', maxDate);
         });
     }
 
-
-    // Call the setMinMaxDates function
     setMinMaxDates();
-
 </script>
 
 <?php
