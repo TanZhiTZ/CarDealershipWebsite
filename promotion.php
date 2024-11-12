@@ -3,6 +3,16 @@ $conn = mysqli_connect('localhost', 'root', '', 'honda');
 
 $promo = mysqli_query($conn, "SELECT * FROM promo order by id");
 
+$limit = 10; // Number of records per page
+$page = isset($_GET['page']) ? $_GET['page'] : 1;
+$start = ($page - 1) * $limit;
+
+$total_promo = mysqli_query($conn, "SELECT COUNT(id) AS count FROM promo");
+$total_count = mysqli_fetch_assoc($total_promo)['count'];
+$total_pages = ceil($total_count / $limit);
+
+$promo = mysqli_query($conn, "SELECT * FROM promo ORDER BY id LIMIT $start, $limit");
+
 
 if (isset($_POST['add_promo'])) {
     $code = $_POST['code'];
@@ -272,6 +282,20 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
             margin-bottom: 12px; 
         }
 
+        .pagination a {
+            color: black;
+            float: left;
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: background-color .3s;
+        }
+
+        .pagination a.active {
+            background-color: red;
+            color: white;
+        }
+
+        .pagination a:hover:not(.active) {background-color: #ddd;}
 
     </style>
 
@@ -355,7 +379,7 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
                         <label for="code">Promotion Code</label>
                         <input type="text" id="code" name="code" required>
                         <br>
-                        <label for="value">Discount Value</label>
+                        <label for="value">Discount Amount</label>
                         <input type="number" id="value" name="value" min="0" step="0.01" value="0" required>
                         <br>
                         <label for="dateStart">Date Start</label>
@@ -384,7 +408,7 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
                         <thead>
                         <tr>
                             <th>Code</th>
-                            <th>Discount Value</th>
+                            <th>Discount Amount</th>
                             <th>Date Start</th>
                             <th>Date End</th>
                             <th>Status</th>
@@ -400,12 +424,18 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
                             <td><?php echo $row['status']; ?></td>
                             <td>
                             <a href="updatePromo.php?edit=<?php echo $row['id'];?>" class="edit-btn"> <i class="fas fa-edit"></i> Edit </a>
-                            <a href="promotion.php?delete=<?php echo $row['id'];?>" class="delete-btn"> <i class="fas fa-trash"></i> Delete </a>
+                            <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $row['id']; ?>)" class="delete-btn"> <i class="fas fa-trash"></i> Delete </a>
                             </td>
                         </tr>
                     <?php } ?>
                     </table>
                 </div>
+        </div>
+        
+        <div class="pagination">
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="promotion.php?page=<?= $i; ?>" class="<?= ($i == $page) ? 'active' : ''; ?>"><?= $i; ?></a>
+            <?php endfor; ?>
         </div>
 
         <script>
@@ -429,33 +459,29 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
             }
 
             function myFunction() {
-                // Declare variables
-                var input, filter, table, tr, td, i, j, txtValue;
-                input = document.getElementById("myInput");
-                filter = input.value.toUpperCase();
-                table = document.getElementById("promo-table");
-                tr = table.getElementsByTagName("tr");
+                var input = document.getElementById("myInput");
+                var filter = input.value.toUpperCase();
+                var table = document.getElementById("promo-table");
+                var tr = table.getElementsByTagName("tr");
 
-                // Start looping from the second row (index 1)
-                for (i = 1; i < tr.length; i++) {
-                    // Loop through all table columns
-                    var found = false;
-                    for (j = 0; j < 3; j++) {  // Assuming you have 3 columns (Model Type, Color, Stock)
-                        td = tr[i].getElementsByTagName("td")[j];
-                        if (td) {
-                            txtValue = td.textContent || td.innerText;
+                for (let i = 1; i < tr.length; i++) {
+                    tr[i].style.display = "none";
+                    let td = tr[i].getElementsByTagName("td");
+                    for (let j = 0; j < td.length; j++) {
+                        if (td[j]) {
+                            let txtValue = td[j].textContent || td[j].innerText;
                             if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                                found = true;
-                                break;  // Break out of the column loop if a match is found
+                                tr[i].style.display = "";
+                                break;
                             }
                         }
                     }
-                    // Show or hide the row based on whether a match was found in any column
-                    if (found) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
+                }
+            }
+
+            function confirmDelete(id) {
+                if (confirm("Are you sure you want to delete this promotion code?")) {
+                    window.location.href = "promotion.php?delete=" + id;
                 }
             }
 

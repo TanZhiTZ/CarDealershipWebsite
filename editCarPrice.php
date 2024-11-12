@@ -64,9 +64,22 @@
         </div>
         <script>
             function editPrice(model) {
-                var np = prompt("How would you like to edit your price?");
-                if (np!= null) {
-                    var c = confirm ("are you sure you want to change the price to " + np + "?");
+                let isValid = false;
+                let np;
+
+                while (!isValid) {
+                    np = prompt("Enter the new price (numbers only):");
+
+                    // Check if the input is a valid number (positive decimal or integer)
+                    if (np !== null && np.trim() !== "" && !isNaN(np) && parseFloat(np) >= 0 || confirm('Are you sure you want to cancel?')) {
+                        isValid = true;
+                    } else if (isValid = false){
+                        alert("Please enter a valid numeric value.");
+                    }
+                }
+
+                if (isValid && np != null && np.trim() !== "" && !isNaN(np) && parseFloat(np) >= 0 ) {
+                    const c = confirm("Are you sure you want to change the price to " + np + "?");
                     if (c) {
                         window.location.href = "updatePrice.php?price=" + encodeURIComponent(np) + "&model_type=" + encodeURIComponent(model);
                     }
