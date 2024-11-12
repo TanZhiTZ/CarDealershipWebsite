@@ -1,17 +1,10 @@
 <?php
+include 'config/config.php';
 if (isset($_GET['token'])) {
     $token = $_GET['token'];
 
-    // Database connection
-    $conn = new mysqli("localhost", "root", "", "volunteer_coordination_system");
-
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
     // Verify token
-    $sql = "SELECT * FROM users WHERE token = ? AND is_verified = 0 LIMIT 1";
+    $sql = "SELECT * FROM user WHERE token = ? AND is_verified = 0 LIMIT 1";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $token);
     $stmt->execute();
@@ -19,7 +12,7 @@ if (isset($_GET['token'])) {
 
     if ($result->num_rows > 0) {
         // Token is valid, verify user
-        $sql = "UPDATE users SET is_verified = 1 WHERE token = ?";
+        $sql = "UPDATE user SET is_verified = 1 WHERE token = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $token);
 
