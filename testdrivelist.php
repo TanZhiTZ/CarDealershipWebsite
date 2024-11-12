@@ -1,14 +1,19 @@
 
 <?php
-
 include 'adminSidebar.php';
 
-
 if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    mysqli_query($conn, "DELETE FROM testdrive WHERE id = $id");
-    echo "<script>alert('Test drive deleted')</script>";
+    $id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
+    if (mysqli_query($conn, "DELETE FROM testdrive WHERE id = $id")) {
+        echo "<script>alert('Test drive deleted')</script>";
+    } else {
+        echo "<script>alert('Error deleting test drive.')</script>";
+    }
+}
 
+// Function to validate email format
+function isValidEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 ?>
 
@@ -47,7 +52,20 @@ if (isset($_GET['delete'])) {
                             $counter = 1;
                             if (mysqli_num_rows($select_reservation) > 0) {
                                 while ($fetch_reservation = mysqli_fetch_assoc($select_reservation)) {
-                                    $checkInDate = date("Y-m-d", strtotime($fetch_reservation['preferreddate'])); // Extracts the date portion (YYYY-MM-DD) from the check-in datetime string
+                                    // Sanitize data for output and email
+                                    $name = htmlspecialchars($fetch_reservation['name'], ENT_QUOTES, 'UTF-8');
+                                    $email = htmlspecialchars($fetch_reservation['email'], ENT_QUOTES, 'UTF-8');
+                                    $contact = htmlspecialchars($fetch_reservation['contact'], ENT_QUOTES, 'UTF-8');
+                                    $testdrivemodel = htmlspecialchars($fetch_reservation['testdrivemodel'], ENT_QUOTES, 'UTF-8');
+                                    $checkInDate = date("Y-m-d", strtotime($fetch_reservation['preferreddate']));
+                                    $preferredtime = htmlspecialchars($fetch_reservation['preferredtime'], ENT_QUOTES, 'UTF-8');
+                                    $user = htmlspecialchars($fetch_reservation['user'], ENT_QUOTES, 'UTF-8');
+                                    
+                                    // Validate email and contact formats
+                                        if (!isValidEmail($email)) {
+                                            echo "<script>alert('Invalid email format for $name')</script>";
+                                            continue;
+                                        }
                                     ?>
                                     <tr>
                                         <td style="font-size:16px;">
