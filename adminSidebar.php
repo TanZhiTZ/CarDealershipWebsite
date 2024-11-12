@@ -1,6 +1,13 @@
 <?php
-session_start();
-$conn = mysqli_connect('localhost', 'root', '', 'honda');
+include('config/constants.php');
+
+//check if user is an admin
+if ($_SESSION['role'] == 'admin') {
+
+
+} else {
+    header('location: index.php');
+}
 ?>
 
 <!DOCTYPE html>
