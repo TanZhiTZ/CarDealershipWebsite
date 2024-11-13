@@ -2,56 +2,58 @@
 session_start();
 $conn = mysqli_connect('localhost', 'root', '', 'honda');
 
-$model = mysqli_query($conn, "SELECT * FROM carinformation order by id asc");
+$model = mysqli_query($conn, "SELECT * FROM carinformation ORDER BY id ASC");
 
+if (isset($_POST['add_spec'])) {
+    // Collect inputs
+    $requiredFields = [
+        'Model', 'ModelId', 'ModelType', 'Price', 'EngineType', 'FuelSupplySystem',
+        'Displacement', 'MaxPower', 'MaxTorque', 'Speed', 'Acceleration',
+        'FuelConsumption', 'Front', 'Rear', 'ParkingBrake', 'Type', 'TurningRadius',
+        'Length', 'Width', 'Height', 'WheelType', 'WheelSize', 'TyreSize', 'SpareTyreSize'
+    ];
+    $data = [];
+    foreach ($requiredFields as $field) {
+        if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
+            $message[] = "$field is required.";
+        } else {
+            $data[$field] = htmlspecialchars(trim($_POST[$field]), ENT_QUOTES);
+        }
+    }
 
-if(isset($_POST['add_spec'])){
+    // Check for errors
+    if (!isset($message)) {
+        // Prepare SQL statement
+        $stmt = $conn->prepare(
+            "INSERT INTO specifications (Model, ModelId, ModelType, Price, EngineType, FuelSupplySystem, Displacement, MaxPower, MaxTorque, Speed, Acceleration, FuelConsumption, Front, Rear, ParkingBrake, Type, TurningRadius, Length, Width, Height, WheelType, WheelSize, TyreSize, SpareTyreSize) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        );
 
-    $Model = $_POST['Model'];
-    $ModelId = $_POST['ModelId'];
-    $ModelType = $_POST['ModelType'];
-    $Price = $_POST['Price'];
-    $EngineType = $_POST['EngineType'];
-    $FuelSupplySystem = $_POST['FuelSupplySystem'];
-    $Displacement = $_POST['Displacement'];
-    $MaxPower = $_POST['MaxPower'];
-    $MaxTorque = $_POST['MaxTorque'];
-    $Speed = $_POST['Speed'];
-    $Acceleration = $_POST['Acceleration'];
-    $FuelConsumption = $_POST['FuelConsumption'];
-    $Front = $_POST['Front'];
-    $Rear = $_POST['Rear'];
-    $ParkingBrake = $_POST['ParkingBrake'];
-    $Type = $_POST['Type'];
-    $TurningRadius = $_POST['TurningRadius'];
-    $Length = $_POST['Length'];
-    $Width = $_POST['Width'];
-    $Height = $_POST['Height'];
-    $WheelType = $_POST['WheelType'];
-    $WheelSize = $_POST['WheelSize'];
-    $TyreSize = $_POST['TyreSize'];
-    $SpareTyreSize = $_POST['SpareTyreSize'];
+        if ($stmt) {
+            $stmt->bind_param(
+                "sissssisssssssssssssss", 
+                $data['Model'], $data['ModelId'], $data['ModelType'], $data['Price'], $data['EngineType'],
+                $data['FuelSupplySystem'], $data['Displacement'], $data['MaxPower'], $data['MaxTorque'], 
+                $data['Speed'], $data['Acceleration'], $data['FuelConsumption'], $data['Front'], 
+                $data['Rear'], $data['ParkingBrake'], $data['Type'], $data['TurningRadius'], 
+                $data['Length'], $data['Width'], $data['Height'], $data['WheelType'], 
+                $data['WheelSize'], $data['TyreSize'], $data['SpareTyreSize']
+            );
 
-    $insert = "INSERT INTO specifications (Model, ModelId, ModelType, Price, EngineType, FuelSupplySystem, Displacement, MaxPower, MaxTorque, Speed, Acceleration, FuelConsumption, Front, Rear, ParkingBrake, Type, TurningRadius, Length, Width, Height, WheelType, WheelSize, TyreSize, SpareTyreSize) 
-    VALUES ('$Model', '$ModelId', '$ModelType', '$Price', '$EngineType', '$FuelSupplySystem', '$Displacement', '$MaxPower', '$MaxTorque', '$Speed', '$Acceleration', '$FuelConsumption', '$Front', '$Rear', '$ParkingBrake', '$Type', '$TurningRadius', '$Length', '$Width', '$Height', '$WheelType', '$WheelSize', '$TyreSize', '$SpareTyreSize')";    
-       
-       $upload = mysqli_query($conn,$insert);
-       if($upload){
-          $message[] = 'new news added successfully';
-          header("Location: addSpec.php");
-       }else{
-          $message[] = 'could not add the specs';
-       }
- };
-
+            if ($stmt->execute()) {
+                $message[] = 'New specifications added successfully.';
+                header("Location: addSpec.php");
+            } else {
+                $message[] = 'Could not add the specifications.';
+            }
+            $stmt->close();
+        }
+    }
+}
 ?>
 
-
-
 <!DOCTYPE html>
-
 <html>
-    
 <head>
     <title>Add Specifications</title>
     <meta charset="UTF-8">

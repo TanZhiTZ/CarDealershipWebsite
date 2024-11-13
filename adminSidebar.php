@@ -34,6 +34,7 @@ if ($_SESSION['role'] == 'admin') {
             <div class="collapse show" id="home-collapse" style="">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                 <li><a href="adminIndex.php" class="link-dark rounded">Prebook</a></li>
+                <li><a href="manageUsers.php" class="link-dark rounded">All Users</a></li>
                 <li><a href="stockList.php" class="link-dark rounded">Stock List</a></li>
                 <li><a href="promotion.php" class="link-dark rounded">Promotion Code</a></li>
             </ul>

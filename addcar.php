@@ -59,7 +59,7 @@ if (isset($_POST['add'])) {
         $target_file = $image_folder . $_FILES[$input_name]['name'];
 
         if (move_uploaded_file($tmp_name, $target_file)) {
-          echo "<script>alert('Image for $input_name uploaded successfully.')</script>";
+          //echo "<script>alert('Image for $input_name uploaded successfully.')</script>";
         } else {
           echo "<script>alert('Failed to upload image for $input_name.')</script>";
         }

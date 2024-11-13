@@ -40,11 +40,11 @@ if (isset($_POST['submit'])) {
                 $hashed_pass = password_hash($pass, PASSWORD_BCRYPT);
                 $token = bin2hex(random_bytes(50)); // Generate a unique token
                 $isVerified = 0; // Initial verification status
+                $role_id = 1; // Set role_id to 1 for default user role
 
-                // Insert new user securely
-                $stmt = $conn->prepare("INSERT INTO `user` (user_name, email, password, token, is_verified) VALUES (?, ?, ?, ?, ?)");
-                $stmt->bind_param("ssssi", $name, $email, $hashed_pass, $token, $isVerified);
-
+                // Insert new user securely with role_id
+                $stmt = $conn->prepare("INSERT INTO `user` (user_name, email, password, token, is_verified, role_id) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("ssssii", $name, $email, $hashed_pass, $token, $isVerified, $role_id);
                 if ($stmt->execute()) {
                     // Send verification email
                     sendVerificationEmail($email, $token);

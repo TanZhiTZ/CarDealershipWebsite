@@ -1,7 +1,18 @@
 <?php
+include 'adminSidebar.php';
 $conn = mysqli_connect('localhost', 'root', '', 'honda');
 
 $promo = mysqli_query($conn, "SELECT * FROM promo order by id");
+
+$limit = 10; // Number of records per page
+$page = isset($_GET['page']) ? $_GET['page'] : 1;
+$start = ($page - 1) * $limit;
+
+$total_promo = mysqli_query($conn, "SELECT COUNT(id) AS count FROM promo");
+$total_count = mysqli_fetch_assoc($total_promo)['count'];
+$total_pages = ceil($total_count / $limit);
+
+$promo = mysqli_query($conn, "SELECT * FROM promo ORDER BY id LIMIT $start, $limit");
 
 
 if (isset($_POST['add_promo'])) {
@@ -272,77 +283,24 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
             margin-bottom: 12px; 
         }
 
+        .pagination a {
+            color: black;
+            float: left;
+            padding: 8px 16px;
+            text-decoration: none;
+            transition: background-color .3s;
+        }
+
+        .pagination a.active {
+            background-color: red;
+            color: white;
+        }
+
+        .pagination a:hover:not(.active) {background-color: #ddd;}
 
     </style>
 
-    <body onload="sidebarHeight()">
-
-    <div id="sideHeight" class="flex-shrink-0 p-4 bg-white" style="width: 200px; min-height:100%; float:left;">
-        <span class="fs-5 fw-semibold">Admin</span>
-        <hr style="border-bottom: 2px solid; border-top: none; margin: 10px 0 10px 0;"/>
-        <ul class="list-unstyled ps-0">
-        <li class="mb-1">
-            <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="true">
-            Home
-            </button>
-            <div class="collapse show" id="home-collapse" style="">
-            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                <li><a href="adminIndex.php" class="link-dark rounded">Dashboard</a></li>
-                <li><a href="stockList.php" class="link-dark rounded">Stock List</a></li>
-                <li><a href="promotion.php" class="link-dark rounded">Promotion Code</a></li>
-            </ul>
-            </div>
-        </li>
-        <li class="mb-1">
-            <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="true">
-            Analytics
-            </button>
-            <div class="collapse show" id="dashboard-collapse" style="">
-            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                <li><a href="soldOverview.php" class="link-dark rounded">Overview</a></li>
-                <li><a href="monthlySold.php" class="link-dark rounded">Monthly</a></li>
-                <li><a href="allMonthlySold.php" class="link-dark rounded">All Month</a></li>
-            </ul>
-            </div>
-        </li>
-        <li class="mb-1">
-            <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="true">
-            Orders
-            </button>
-            <div class="collapse show" id="orders-collapse" style="">
-            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                <li><a href="prebooklist.php" class="link-dark rounded">Bookings</a></li>
-                <li><a href="soldHistory.php" class="link-dark rounded">History</a></li>
-            </ul>
-            </div>
-        </li>
-        <li class="mb-1">
-            <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#manage-collapse" aria-expanded="true">
-            Manage Cars
-            </button>
-            <div class="collapse show" id="manage-collapse" style="">
-            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                <li><a href="addcar.php" class="link-dark rounded">Add Car</a></li>
-                <li><a href="addSpec.php" class="link-dark rounded">Add Spec</a></li>
-                <li><a href="editCarPrice.php" class="link-dark rounded">Edit Price</a></li>
-                <li><a href="stock.php" class="link-dark rounded">Edit Stock</a></li>
-            </ul>
-            </div>
-        </li>
-        <li class="border-top my-3"></li>
-        <li class="mb-1">
-            <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="true">
-            Account
-            </button>
-            <div class="collapse show" id="account-collapse" style="">
-            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                <li><a href="config/adminLogout.php" class="link-dark rounded">Sign out</a></li>
-            </ul>
-            </div>
-        </li>
-        </ul>
-    </div>
-
+    <body>
         <div style="padding: 1px; margin-left: 250px; text-align:center;">
             <h1 align="center" style="margin-top: 50px; margin-bottom: 50px;">Promotion</h1>
 
@@ -355,7 +313,7 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
                         <label for="code">Promotion Code</label>
                         <input type="text" id="code" name="code" required>
                         <br>
-                        <label for="value">Discount Value</label>
+                        <label for="value">Discount Amount</label>
                         <input type="number" id="value" name="value" min="0" step="0.01" value="0" required>
                         <br>
                         <label for="dateStart">Date Start</label>
@@ -384,7 +342,7 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
                         <thead>
                         <tr>
                             <th>Code</th>
-                            <th>Discount Value</th>
+                            <th>Discount Amount</th>
                             <th>Date Start</th>
                             <th>Date End</th>
                             <th>Status</th>
@@ -400,25 +358,21 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
                             <td><?php echo $row['status']; ?></td>
                             <td>
                             <a href="updatePromo.php?edit=<?php echo $row['id'];?>" class="edit-btn"> <i class="fas fa-edit"></i> Edit </a>
-                            <a href="promotion.php?delete=<?php echo $row['id'];?>" class="delete-btn"> <i class="fas fa-trash"></i> Delete </a>
+                            <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $row['id']; ?>)" class="delete-btn"> <i class="fas fa-trash"></i> Delete </a>
                             </td>
                         </tr>
                     <?php } ?>
                     </table>
                 </div>
         </div>
+        
+        <div class="pagination">
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="promotion.php?page=<?= $i; ?>" class="<?= ($i == $page) ? 'active' : ''; ?>"><?= $i; ?></a>
+            <?php endfor; ?>
+        </div>
 
         <script>
-
-            function sidebarHeight() {
-                var body = document.body,
-                html = document.documentElement;
-
-                var fullHeight = Math.max( body.scrollHeight, body.offsetHeight, 
-                                    html.clientHeight, html.scrollHeight, html.offsetHeight );
-                
-                document.getElementById("sideHeight").style.height = fullHeight + "px";
-            }
 
             function addCode() {
             document.getElementById("add-box").style.display = "block";
@@ -429,33 +383,29 @@ if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
             }
 
             function myFunction() {
-                // Declare variables
-                var input, filter, table, tr, td, i, j, txtValue;
-                input = document.getElementById("myInput");
-                filter = input.value.toUpperCase();
-                table = document.getElementById("promo-table");
-                tr = table.getElementsByTagName("tr");
+                var input = document.getElementById("myInput");
+                var filter = input.value.toUpperCase();
+                var table = document.getElementById("promo-table");
+                var tr = table.getElementsByTagName("tr");
 
-                // Start looping from the second row (index 1)
-                for (i = 1; i < tr.length; i++) {
-                    // Loop through all table columns
-                    var found = false;
-                    for (j = 0; j < 3; j++) {  // Assuming you have 3 columns (Model Type, Color, Stock)
-                        td = tr[i].getElementsByTagName("td")[j];
-                        if (td) {
-                            txtValue = td.textContent || td.innerText;
+                for (let i = 1; i < tr.length; i++) {
+                    tr[i].style.display = "none";
+                    let td = tr[i].getElementsByTagName("td");
+                    for (let j = 0; j < td.length; j++) {
+                        if (td[j]) {
+                            let txtValue = td[j].textContent || td[j].innerText;
                             if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                                found = true;
-                                break;  // Break out of the column loop if a match is found
+                                tr[i].style.display = "";
+                                break;
                             }
                         }
                     }
-                    // Show or hide the row based on whether a match was found in any column
-                    if (found) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
+                }
+            }
+
+            function confirmDelete(id) {
+                if (confirm("Are you sure you want to delete this promotion code?")) {
+                    window.location.href = "promotion.php?delete=" + id;
                 }
             }
 
