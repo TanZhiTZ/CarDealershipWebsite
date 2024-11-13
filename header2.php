@@ -152,9 +152,13 @@ include('config/constants.php');
                 </li>
 
                 <li><a href="testdrivebooking.php">Test Drive</a></li>
-                
+                <li><a href="accessory.php">Accessory</a></li>
                     
                         <?php
+
+                        if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'supplier') {
+                            echo '<li><a href="add_accessory.php">Add Accessories (Supplier)</a></li>';
+                        }
                         if (isset($_SESSION['user_name'])) {
                             echo ' 
                                     <li><a href="#"><i class="fa fa-user" aria-hidden="true"></i></a>
