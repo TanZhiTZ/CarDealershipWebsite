@@ -187,12 +187,13 @@ include('config/constants.php');
 
                 <li><a href="testdrivebooking.php">Test Drive</a></li>
                 <li><a href="accessory.php">Accessory</a></li>
+                
                     
                         <?php
-
                         if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'supplier') {
                             echo '<li><a href="add_accessory.php">Add Accessories (Supplier)</a></li>';
                         }
+
                         if (isset($_SESSION['user_name'])) {
                             echo ' 
                                     <li><a href="#"><i class="fa fa-user" aria-hidden="true"></i></a>
@@ -223,7 +224,7 @@ include('config/constants.php');
     <!-- Pop-up HTML -->
     <div id="popup">
         <p>Please read our Data Protection and User Education before continuing on our webpage.</p>
-        <button onclick="closePopup()"><a href="bestPractices.php" target="_BLANK" style="color: white; text-decoration: none;">Accept</a></button>
+        <a href="bestPractices.php" target="_blank" style="color: white; text-decoration: none;"><button onclick="closePopup()">Accept</button></a>
     </div>
 
     <script>
