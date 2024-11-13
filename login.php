@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 include('config/constants.php');
 require 'C:/xampp/htdocs/PHPMailer-6.8.0/src/PHPMailer.php';
 require 'C:/xampp/htdocs/PHPMailer-6.8.0/src/SMTP.php';
