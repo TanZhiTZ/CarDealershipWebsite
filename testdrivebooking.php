@@ -5,6 +5,12 @@ error_reporting(0);
 if (isset($_SESSION['user_id'])) {
 
     if (isset($_POST['book'])) {
+        // Check if the user's role is banned
+        if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'banned') {
+            echo "<script>alert('You are banned from booking a test drive.'); window.location.href = 'index.php';</script>";
+            exit; // Stop further execution if the user is banned
+        }
+
         // Sanitize and validate each input field
         $name = filter_var(trim($_POST['name']), FILTER_SANITIZE_STRING);
         $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
