@@ -26,7 +26,6 @@ include('config/constants.php');
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
     <script src="//code.tidio.co/qied5pfxufauymib8y3r8j4wc8ksprqo.js" async></script>
-    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
 
     <style>
         * {
@@ -40,8 +39,6 @@ include('config/constants.php');
 
         body {
             min-height: 100vh;
-            /* font-family: Arial, sans-serif; */
-            /* margin: 0px; */
         }
 
         h3 {
@@ -118,14 +115,51 @@ include('config/constants.php');
         .text-center {
             text-align: center !important;
         }
-    </style>
+        
+    #popup {
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 350px;
+        padding: 20px;
+        background-color: rgba(51, 51, 51, 0.9); 
+        color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        display: none;
+        z-index: 1001;
+        backdrop-filter: blur(5px);
+        font-family: Arial, sans-serif;
+    }
+
+    #popup button {
+        margin-top: 10px;
+        padding: 10px 15px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: bold;
+    }
+
+    #popup button:hover {
+        background-color: #218838;
+    }
+
+    #popup .content p {
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 10px;
+    }
+
+</style>
 
 <body>
 
     <header>
-
-
-
         <!-- <div class="logo"> -->
         <a href="index.php">
             <img class="toplogo" src="https://www.honda.com.my/img/interface/honda-logo-pod2.svg"
@@ -152,20 +186,25 @@ include('config/constants.php');
                 </li>
 
                 <li><a href="testdrivebooking.php">Test Drive</a></li>
+                <li><a href="accessory.php">Accessory</a></li>
                 
                     
                         <?php
+                        if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'supplier') {
+                            echo '<li><a href="add_accessory.php">Add Accessories (Supplier)</a></li>';
+                        }
+
                         if (isset($_SESSION['user_name'])) {
                             echo ' 
                                     <li><a href="#"><i class="fa fa-user" aria-hidden="true"></i></a>
                                         <ul>
                                             <li>
                                                 <a href="account.php">User Profile</a>
-                                                <a href="config/logout.php">Logout</a>
+                                                <a href="config/logout.php" onclick="clearSession()">Logout</a>
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><a href="config/logout.php" title="Login now!"><i class="fa fa-sign-in" aria-hidden="true"></i></a></li>
+                                    <li><a href="config/logout.php" title="Logout now!" onclick="clearSession()"><i class="fa fa-sign-in" aria-hidden="true"></i></a></li>
                                 ';
                         } else {
                             echo ' 
@@ -181,9 +220,35 @@ include('config/constants.php');
         </nav>
 
     </header>
-
+    
+    <!-- Pop-up HTML -->
+    <div id="popup">
+        <p>Please read our Data Protection and User Education before continuing on our webpage.</p>
+        <button onclick="closePopup()"><a href="bestPractices.php" target="_BLANK" style="color: white; text-decoration: none;">Accept</a></button>
+    </div>
 
     <script>
+        // Close the pop-up and store user acceptance
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+            sessionStorage.setItem("popupAccepted", "true");
+        }
+
+        // Check if user previously accepted
+        if (sessionStorage.getItem("popupAccepted") === "true") {
+            document.getElementById("popup").style.display = "none";
+        } else {
+            window.onload = function() {
+                setTimeout(() => {
+                    document.getElementById("popup").style.display = "block";
+                }, 1000);
+            };
+        }
+
+        function clearSession() {
+            sessionStorage.clear();
+        }
+
         // JavaScript function to toggle the search bar
         function toggleSearch() {
             var searchIcon = document.querySelector('.search-icon');
