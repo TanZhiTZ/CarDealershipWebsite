@@ -5,59 +5,75 @@ if(isset($_GET['id'])){
     $id = $_GET['id'];
 };
 
-$model = mysqli_query($conn, "SELECT * FROM carinformation where id = $id");
+// Fetch model information with prepared statements for security
+$modelStmt = $conn->prepare("SELECT * FROM carinformation WHERE id = ?");
+$modelStmt->bind_param("i", $id);
+$modelStmt->execute();
+$model = $modelStmt->get_result();
 
-$spec = mysqli_query($conn, "SELECT * FROM specifications where ModelId = $id");
+// Fetch specifications
+$specStmt = $conn->prepare("SELECT * FROM specifications WHERE ModelId = ?");
+$specStmt->bind_param("i", $id);
+$specStmt->execute();
+$spec = $specStmt->get_result();
 
-$stock = mysqli_query($conn, "SELECT * FROM stock where modelId = $id order by specId");
+// Fetch stock details ordered by specId
+$stockStmt = $conn->prepare("SELECT * FROM stock WHERE modelId = ? ORDER BY specId");
+$stockStmt->bind_param("i", $id);
+$stockStmt->execute();
+$stock = $stockStmt->get_result();
 
 if (isset($_POST['add_stock'])) {
     $modelId = $_POST['modelId'];
     $specId = $_POST['specId'];
     $specModel = $_POST['specModel'];
     $color = $_POST['color'];
-    $stock = $_POST['stock'];
+    $stockAmount = $_POST['stock'];
 
-    // Check if a record with the same specId, specModel, and color exists
-    $checkDuplicate = mysqli_query($conn, "SELECT * FROM stock WHERE specId = '$specId' AND specModel = '$specModel' AND color = '$color'");
+    // Duplicate entry check
+    $checkDuplicateStmt = $conn->prepare("SELECT * FROM stock WHERE specId = ? AND specModel = ? AND color = ?");
+    $checkDuplicateStmt->bind_param("iss", $specId, $specModel, $color);
+    $checkDuplicateStmt->execute();
+    $checkDuplicate = $checkDuplicateStmt->get_result();
 
-    if (mysqli_num_rows($checkDuplicate) > 0) {
+    if ($checkDuplicate->num_rows > 0) {
         header("Location: viewStock.php?id=$id&error=duplicate");
-        exit; // Add exit here to stop the script execution
+        exit;
     } else {
-        // Insert the new stock
-        $insert = "INSERT INTO stock (modelId, specId, specModel, color, stock) 
-            VALUES ('$modelId', '$specId', '$specModel', '$color', '$stock')";
+        // Insert new stock
+        $insertStmt = $conn->prepare("INSERT INTO stock (modelId, specId, specModel, color, stock) VALUES (?, ?, ?, ?, ?)");
+        $insertStmt->bind_param("iissi", $modelId, $specId, $specModel, $color, $stockAmount);
         
-        $upload = mysqli_query($conn, $insert);
-
-        if ($upload) {
-            $message[] = 'New stock added successfully';
-            header("Location: viewStock.php?id=$id");
+        if ($insertStmt->execute()) {
+            header("Location: viewStock.php?id=$id&message=success");
         } else {
-            $message[] = 'Could not add the stock';
+            echo "<script>alert('Could not add the stock');</script>";
         }
     }
 }
 
 if (isset($_GET['delete'])) {
     $deleteId = $_GET['delete'];
-    mysqli_query($conn, "DELETE FROM stock WHERE id = $deleteId");
-    echo "<script>window.location.replace('viewStock.php?id=$id');</script>";
+    $deleteStmt = $conn->prepare("DELETE FROM stock WHERE id = ?");
+    $deleteStmt->bind_param("i", $deleteId);
+    $deleteStmt->execute();
+    echo "<script>window.location.replace('viewStock.php?id=$id&message=deleted');</script>";
 }
 
-// Display an alert for duplicate entry
+// Display alerts
 if (isset($_GET['error']) && $_GET['error'] === 'duplicate') {
     echo "<script>alert('A stock with the same Model Type already exists.');</script>";
 }
-
-
+if (isset($_GET['message']) && $_GET['message'] === 'success') {
+    echo "<script>alert('New stock added successfully.');</script>";
+}
+if (isset($_GET['message']) && $_GET['message'] === 'deleted') {
+    echo "<script>alert('Stock deleted successfully.');</script>";
+}
 ?>
 
 <!DOCTYPE html>
 <html>
-
-
     <head>
         <title>Honda Car Dealership &bull; View Stock</title>
         <meta charset="UTF-8">

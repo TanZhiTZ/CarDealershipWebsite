@@ -47,7 +47,6 @@ if (isset($_POST['submit'])) {
                 // Insert new user securely with role_id
                 $stmt = $conn->prepare("INSERT INTO `user` (user_name, email, password, token, is_verified, role_id) VALUES (?, ?, ?, ?, ?, ?)");
                 $stmt->bind_param("ssssii", $name, $email, $hashed_pass, $token, $isVerified, $role_id);
-
                 if ($stmt->execute()) {
                     // Send verification email
                     sendVerificationEmail($email, $token);
@@ -61,7 +60,6 @@ if (isset($_POST['submit'])) {
         }
     }
 }
-
 
 function sendVerificationEmail($email, $token)
 {

@@ -1,8 +1,8 @@
 <?php
 include('config/constants.php');
-require 'C:/xampp/htdocs/PHPMailer-6.8.0/src/PHPMailer.php';
-require 'C:/xampp/htdocs/PHPMailer-6.8.0/src/SMTP.php';
-require 'C:/xampp/htdocs/PHPMailer-6.8.0/src/Exception.php';
+require 'D:/xampp/htdocs/PHPMailer-6.8.0/src/PHPMailer.php';
+require 'D:/xampp/htdocs/PHPMailer-6.8.0/src/SMTP.php';
+require 'D:/xampp/htdocs/PHPMailer-6.8.0/src/Exception.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -18,7 +18,6 @@ if (isset($_POST['submit'])) {
   $email = mysqli_real_escape_string($conn, $_POST['email']);
   $pass = $_POST['password'];
 
-  // Modify the SQL to fetch the role_id as well
   $stmt = $conn->prepare("SELECT * FROM `user` WHERE email = ? AND admin = '0'");
   $stmt->bind_param("s", $email);
   $stmt->execute();

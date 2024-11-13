@@ -27,6 +27,7 @@ if(isset($_POST['add_user'])) {
 
     $add_query = "INSERT INTO `user` (`user_name`, `email`, `password`, `admin`, `failed_attempts`, `last_failed_attempt`, `token`, `is_verified`, `role_id`) 
                   VALUES ('$user_name', '$email', '$password', '$admin', '$failed_attempts', '$last_failed_attempt', '$token', '$is_verified', '$role_id')";
+
     if(mysqli_query($conn, $add_query)) {
         echo "User added successfully!";
     } else {
@@ -44,6 +45,7 @@ if(isset($_POST['update_user'])) {
     $role_id = $_POST['role_id']; // Adding role_id
 
     $update_query = "UPDATE `user` SET `user_name` = '$user_name', `email` = '$email', `admin` = '$admin', `is_verified` = '$is_verified', `role_id` = '$role_id' WHERE `user_id` = $user_id";
+
     if(mysqli_query($conn, $update_query)) {
         echo "User updated successfully!";
     } else {
@@ -152,12 +154,14 @@ if(isset($_GET['delete_user'])) {
                     <option value="no" <?php echo isset($user_data) && $user_data['is_verified'] == 0 ? 'selected' : ''; ?>>Not Verified</option>
                     <option value="yes" <?php echo isset($user_data) && $user_data['is_verified'] == 1 ? 'selected' : ''; ?>>Verified</option>
                 </select>
+
                 <!-- Role selection dropdown -->
                 <select name="role_id">
                     <option value="1" <?php echo isset($user_data) && $user_data['role_id'] == 1 ? 'selected' : ''; ?>>User</option>
                     <option value="2" <?php echo isset($user_data) && $user_data['role_id'] == 2 ? 'selected' : ''; ?>>Supplier</option>
                     <option value="3" <?php echo isset($user_data) && $user_data['role_id'] == 3 ? 'selected' : ''; ?>>Banned</option>
                 </select>
+
                 <button type="submit" name="add_user" <?php echo isset($user_data) ? 'style="display:none"' : ''; ?>>Add User</button>
                 <button type="submit" name="update_user" <?php echo isset($user_data) ? '' : 'style="display:none"'; ?>>Update User</button>
             </form>
