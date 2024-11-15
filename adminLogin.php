@@ -1,7 +1,7 @@
 <?php
 include 'config/constants.php';
-
 ini_set('display_errors', 0);
+session_start();
 
 // Function to prevent brute force by limiting attempts
 function is_locked_out() {
@@ -37,47 +37,48 @@ if (isset($_POST['submit'])) {
     $user = sanitize_input($_POST['user']);
     $pass = sanitize_input($_POST['password']);
     
-    // no empty inputs and length within 50
+    // Check for empty inputs and length within 50 characters
     if (empty($user) || empty($pass) || strlen($user) > 50 || strlen($pass) > 50) {
         echo '<script>alert("Invalid username or password.");</script>';
         return;
     }
 
-    // using prepare to prevent SQL injection
-    $stmt = $conn->prepare("SELECT user_id, user_name FROM user WHERE user_name = ? AND admin = '1'");
+    // Prepare statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT user_id, user_name, password, admin FROM user WHERE user_name = ? AND admin IN (1, 2)");
     $stmt->bind_param('s', $user);
     $stmt->execute();
     $result = $stmt->get_result();
 
     // Check if the user exists and verify password
     if ($result->num_rows > 0) {
-      $row = $result->fetch_assoc();
-      
-      // passwords are hashed using password_hash bcrypt
-      if (password_verify($pass, $row['password'])) {
-          // Reset attempts on successful login
-          $_SESSION['login_attempts'] = 0;
+        $row = $result->fetch_assoc();
+        
+        // Verify the password (hashed using password_hash with bcrypt)
+        if (password_verify($pass, $row['password'])) {
+            // Reset attempts on successful login
+            $_SESSION['login_attempts'] = 0;
 
-          // Set session variables and regenerate session ID
-          $_SESSION['user_id'] = $row['user_id'];
-          $_SESSION['user_name'] = $row['user_name'];
-          $_SESSION['role'] = 'admin';
-          session_regenerate_id();
+            // Set session variables based on role
+            $_SESSION['user_id'] = $row['user_id'];
+            $_SESSION['user_name'] = $row['user_name'];
+            $_SESSION['role'] = ($row['admin'] == 2) ? 'super_admin' : 'admin';
+            session_regenerate_id();
 
-          header('Location: adminIndex.php');
-          exit;
-      } else {
-          echo '<script>alert("Incorrect password.");</script>';
-      }
-  } else {
-      echo '<script>alert("Username does not exist or you are not an admin.");</script>';
-  }
+            // Redirect to the appropriate dashboard
+            header('Location: adminIndex.php');
+            exit;
+        } else {
+            echo '<script>alert("Incorrect password.");</script>';
+        }
+    } else {
+        echo '<script>alert("Username does not exist or you do not have admin privileges.");</script>';
+    }
 
-  // Increment login attempts on failure
-  $_SESSION['login_attempts']++;
-  $_SESSION['last_attempt'] = time();
+    // Increment login attempts on failure
+    $_SESSION['login_attempts']++;
+    $_SESSION['last_attempt'] = time();
 
-  $stmt->close();
+    $stmt->close();
 }
 ?>
 
