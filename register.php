@@ -48,8 +48,10 @@ if (isset($_POST['submit'])) {
                 if ($stmt->execute()) {
                     // Send verification email
                     sendVerificationEmail($email, $token);
-                    $message[] = 'Account registered! Verification email has been sent.';
-                    header('location:login.php'); // Redirect after message
+                    echo "<script>
+                    alert('Account registered! Verification email has been sent.');
+                    window.location.href = 'login.php';
+                </script>";
                     exit;
                 } else {
                     $message[] = 'Account not registered!';
