@@ -217,7 +217,7 @@ if (isset($_SESSION['user_name'])) {
 
 
 <section>
-    <div class="container" style="max-width:1519px; padding:0px; margin:0;">
+    <div class="container" style="max-width:1519px; padding:0px; margin:0 auto;">
         <div class="row custom-row-width">
             <div class="col-lg-6"
                 style="background-image: url(img/home3.jpg); background-size:contain; background-repeat:no-repeat; height:429px; min-width:750px; padding:0">
