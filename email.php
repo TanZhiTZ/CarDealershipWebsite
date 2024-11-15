@@ -1,11 +1,10 @@
 <?php
-require 'D:/xampp/htdocs/PHPMailer-6.8.0/src/PHPMailer.php';
-require 'D:/xampp/htdocs/PHPMailer-6.8.0/src/SMTP.php';
-require 'D:/xampp/htdocs/PHPMailer-6.8.0/src/Exception.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
+
+require './vendor/autoload.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Retrieve form data
@@ -33,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Add the data to the form_data array
             $form_data[] = $data;
         }
-
     }
 
     foreach ($form_data as $data) {
@@ -101,4 +99,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: testdrivelist.php");
     exit;
 }
-?>

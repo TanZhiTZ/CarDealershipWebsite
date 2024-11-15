@@ -1,6 +1,12 @@
 <?php
 include_once 'header2.php';
 
+// Check if user role is banned
+if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'banned') {
+    echo "<script>alert('You are banned from making a booking.'); window.location.href = 'index.php';</script>";
+    exit; // Stop further execution of the script
+}
+
 $variant = filter_input(INPUT_POST, 'variant', FILTER_SANITIZE_STRING);
 $color = filter_input(INPUT_POST, 'color', FILTER_SANITIZE_STRING);
 $model = filter_input(INPUT_POST, 'model', FILTER_SANITIZE_STRING);

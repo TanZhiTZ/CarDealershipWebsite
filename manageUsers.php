@@ -24,7 +24,9 @@ if (isset($_GET['edit_user'])) {
 if (isset($_POST['add_user'])) {
     $user_name = $_POST['user_name'];
     $email = $_POST['email'];
+
     $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+
     $admin = $_POST['admin'] == 'super_admin' ? 2 : ($_POST['admin'] == 'yes' ? 1 : 0); // 2 for Super Admin, 1 for Admin, 0 for regular user
     $failed_attempts = 0;
     $last_failed_attempt = NULL;

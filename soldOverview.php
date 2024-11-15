@@ -1,6 +1,15 @@
 <?php
 include_once 'adminSidebar.php';
 
+// Check if user is logged in and has the role of Super Admin
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'super_admin') {
+    echo "<script>
+        alert('Access denied. Only Super Admins can access this page.');
+        window.location.href = 'adminIndex.php';
+    </script>";
+    exit;
+}
+
 $query = "SELECT specModel, soldnum, color, year FROM carsold ORDER BY soldnum";
     
         // prepare query statement
