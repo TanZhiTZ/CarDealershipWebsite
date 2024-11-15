@@ -23,7 +23,6 @@ $count = mysqli_num_rows($res);
 if ($count > 0) {
     while ($row = mysqli_fetch_assoc($res)) {
         $modelpic = $row['modelpic'];
-
     }
 }
 ?>
@@ -181,7 +180,7 @@ if ($count > 0) {
             <h2 class>' . $model . '</h2>
             <p class="model">' . $variant . '</p>
             
-            <img src="img/ ' . $modelpic . '" class="car-model" alt="Honda Accord"
+            <img src="img/' . $modelpic . '" class="car-model" alt="Honda Accord"
                 style="margin: 0 auto; display:block; margin-top:30px;" width="522px" height="219px" />
                 ';
             ?>
@@ -190,7 +189,7 @@ if ($count > 0) {
 
     <!-- Select variant and color -->
     <?php
-    $select = mysqli_query($conn, "SELECT * FROM stock WHERE specModel = '$variant'");    
+    $select = mysqli_query($conn, "SELECT * FROM stock WHERE specModel = '$variant'");
     ?>
     <section>
         <form action="prebookform.php" method="POST">

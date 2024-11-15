@@ -4,30 +4,27 @@ include_once 'header2.php';
 
 <?php
 if (isset($_SESSION['user_id'])) {
-$model = isset($_GET['model']) ? $_GET['model'] : die();
-$variant = isset($_GET['variant']) ? $_GET['variant'] : null;
+    $model = isset($_GET['model']) ? $_GET['model'] : die();
+    $variant = isset($_GET['variant']) ? $_GET['variant'] : null;
 
 
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-
-}
-
-
-$sql = "SELECT * FROM carinformation WHERE model='$model'";
-
-$res = mysqli_query($conn, $sql);
-
-$count = mysqli_num_rows($res);
-
-if ($count > 0) {
-    while ($row = mysqli_fetch_assoc($res)) {
-        $modelpic = $row['modelpic'];
-
+    if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
     }
-}
-}
-else{
+
+
+    $sql = "SELECT * FROM carinformation WHERE model='$model'";
+
+    $res = mysqli_query($conn, $sql);
+
+    $count = mysqli_num_rows($res);
+
+    if ($count > 0) {
+        while ($row = mysqli_fetch_assoc($res)) {
+            $modelpic = $row['modelpic'];
+        }
+    }
+} else {
     echo "User ID is not set in the session.";
     echo "<script>alert('Please login first.'); window.location.href = 'login.php';</script>";
 }
@@ -201,7 +198,7 @@ else{
             echo '
             <h2 class>book your honda</h2>
             <p class="model">' . $model . '</p>
-            <img src="img/ ' . $modelpic . '" class="car-model" alt="Honda Accord"
+            <img src="img/' . $modelpic . '" class="car-model" alt="Honda Accord"
                 style="margin: 0 auto; display:block; margin-top:30px;" width="522px" height="219px" />
                 ';
             ?>
