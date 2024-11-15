@@ -56,11 +56,9 @@ if (isset($_POST['submit'])) {
           $reset_stmt->bind_param("i", $row['user_id']);
           $reset_stmt->execute();
 
-          // Set session variables including the role
           $_SESSION['user_id'] = $row['user_id'];
           $_SESSION['user_name'] = $row['user_name'];
-          $_SESSION['role_id'] = $row['role_id']; // Storing the role_id
-          $_SESSION['role_name'] = getRoleName($conn, $row['role_id']); // Storing the role name
+          $_SESSION['role'] = 'user';
 
           header('location:index.php');
           exit;
@@ -93,15 +91,7 @@ if (isset($_POST['submit'])) {
   }
 }
 
-// Function to get role name based on role_id
-function getRoleName($conn, $role_id) {
-  $stmt = $conn->prepare("SELECT role_name FROM role WHERE role_id = ?");
-  $stmt->bind_param("i", $role_id);
-  $stmt->execute();
-  $result = $stmt->get_result();
-  $role = $result->fetch_assoc();
-  return $role['role_name'] ?? 'user';
-}
+
 
 // Function to send verification email
 function sendVerificationEmail($email, $token)
@@ -129,7 +119,7 @@ function sendVerificationEmail($email, $token)
       </head>
       <body>
         <p>Click the link below to verify your email address:</p>
-        <a href="http://localhost/Enterprise-Project-main/verification.php?token=' . $token . '">Verify Email</a>
+        <a href="http://localhost/CarDealershipWebsite-main/verification.php?token=' . $token . '">Verify Email</a>
       </body>
       </html>
     ';

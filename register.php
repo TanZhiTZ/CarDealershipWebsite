@@ -40,11 +40,11 @@ if (isset($_POST['submit'])) {
                 $hashed_pass = password_hash($pass, PASSWORD_BCRYPT);
                 $token = bin2hex(random_bytes(50)); // Generate a unique token
                 $isVerified = 0; // Initial verification status
-                $role_id = 1; // Set role_id to 1 for default user role
 
-                // Insert new user securely with role_id
-                $stmt = $conn->prepare("INSERT INTO `user` (user_name, email, password, token, is_verified, role_id) VALUES (?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("ssssii", $name, $email, $hashed_pass, $token, $isVerified, $role_id);
+                // Insert new user securely
+                $stmt = $conn->prepare("INSERT INTO `user` (user_name, email, password, token, is_verified) VALUES (?, ?, ?, ?, ?)");
+                $stmt->bind_param("ssssi", $name, $email, $hashed_pass, $token, $isVerified);
+
                 if ($stmt->execute()) {
                     // Send verification email
                     sendVerificationEmail($email, $token);
@@ -87,7 +87,7 @@ function sendVerificationEmail($email, $token)
         </head>
         <body>
             <p>Click the link below to verify your email address:</p>
-            <a href="http://localhost/Enterprise-Project-main/verification.php?token=' . $token . '">Verify Email</a>
+            <a href="http://localhost/CarDealershipWebsite-main/verification.php?token=' . $token . '">Verify Email</a>
         </body>
         </html>
         ';
