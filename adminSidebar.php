@@ -1,12 +1,13 @@
 <?php
 include('config/constants.php');
 
-//check if user is an admin
-if ($_SESSION['role'] == 'admin') {
-
-
+// Check if user is an admin or superadmin
+if ($_SESSION['role'] == 'admin' || $_SESSION['role'] == 'super_admin') {
+    // Allow access to the page
 } else {
-    header('location: index.php');
+    // Redirect to the admin login page if not an admin or superadmin
+    header('location: adminLogin.php');
+    exit;
 }
 ?>
 
