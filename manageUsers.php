@@ -2,9 +2,16 @@
 include 'adminSidebar.php';
 $conn = mysqli_connect('localhost', 'root', '', 'honda');
 
-$query = "SELECT * FROM `user`";
-$result = mysqli_query($conn, $query);
+// Check if user is logged in and has the role of Super Admin
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'super_admin') {
+    echo "<script>
+        alert('Access denied. Only Super Admins can access this page.');
+        window.location.href = 'adminIndex.php';
+    </script>";
+    exit;
+}
 
+// Fetch user data if editing
 $user_data = null;
 if (isset($_GET['edit_user'])) {
     $user_id = $_GET['edit_user'];
@@ -14,21 +21,20 @@ if (isset($_GET['edit_user'])) {
 }
 
 // Add new user
-if(isset($_POST['add_user'])) {
+if (isset($_POST['add_user'])) {
     $user_name = $_POST['user_name'];
     $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hashing password
-    $admin = $_POST['admin'] == 'yes' ? 1 : 0;
+    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+    $admin = $_POST['admin'] == 'super_admin' ? 2 : ($_POST['admin'] == 'yes' ? 1 : 0); // 2 for Super Admin, 1 for Admin, 0 for regular user
     $failed_attempts = 0;
     $last_failed_attempt = NULL;
     $token = NULL;
     $is_verified = 0;
-    $role_id = $_POST['role_id']; // Adding role_id
+    $role_id = $_POST['role_id'];
 
     $add_query = "INSERT INTO `user` (`user_name`, `email`, `password`, `admin`, `failed_attempts`, `last_failed_attempt`, `token`, `is_verified`, `role_id`) 
                   VALUES ('$user_name', '$email', '$password', '$admin', '$failed_attempts', '$last_failed_attempt', '$token', '$is_verified', '$role_id')";
-
-    if(mysqli_query($conn, $add_query)) {
+    if (mysqli_query($conn, $add_query)) {
         echo "User added successfully!";
     } else {
         echo "Error adding user: " . mysqli_error($conn);
@@ -36,17 +42,16 @@ if(isset($_POST['add_user'])) {
 }
 
 // Update user
-if(isset($_POST['update_user'])) {
+if (isset($_POST['update_user'])) {
     $user_id = $_POST['user_id'];
     $user_name = $_POST['user_name'];
     $email = $_POST['email'];
-    $admin = $_POST['admin'] == 'yes' ? 1 : 0;
+    $admin = $_POST['admin'] == 'super_admin' ? 2 : ($_POST['admin'] == 'yes' ? 1 : 0);
     $is_verified = $_POST['is_verified'] == 'yes' ? 1 : 0;
-    $role_id = $_POST['role_id']; // Adding role_id
+    $role_id = $_POST['role_id'];
 
     $update_query = "UPDATE `user` SET `user_name` = '$user_name', `email` = '$email', `admin` = '$admin', `is_verified` = '$is_verified', `role_id` = '$role_id' WHERE `user_id` = $user_id";
-
-    if(mysqli_query($conn, $update_query)) {
+    if (mysqli_query($conn, $update_query)) {
         echo "User updated successfully!";
     } else {
         echo "Error updating user: " . mysqli_error($conn);
@@ -54,16 +59,17 @@ if(isset($_POST['update_user'])) {
 }
 
 // Delete user
-if(isset($_GET['delete_user'])) {
+if (isset($_GET['delete_user'])) {
     $user_id = $_GET['delete_user'];
     $delete_query = "DELETE FROM `user` WHERE `user_id` = $user_id";
-    if(mysqli_query($conn, $delete_query)) {
+    if (mysqli_query($conn, $delete_query)) {
         echo "User deleted successfully!";
     } else {
         echo "Error deleting user: " . mysqli_error($conn);
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -149,19 +155,17 @@ if(isset($_GET['delete_user'])) {
                 <select name="admin">
                     <option value="no" <?php echo isset($user_data) && $user_data['admin'] == 0 ? 'selected' : ''; ?>>Not Admin</option>
                     <option value="yes" <?php echo isset($user_data) && $user_data['admin'] == 1 ? 'selected' : ''; ?>>Admin</option>
+                    <option value="super_admin" <?php echo isset($user_data) && $user_data['admin'] == 2 ? 'selected' : ''; ?>>Super Admin</option>
                 </select>
                 <select name="is_verified">
                     <option value="no" <?php echo isset($user_data) && $user_data['is_verified'] == 0 ? 'selected' : ''; ?>>Not Verified</option>
                     <option value="yes" <?php echo isset($user_data) && $user_data['is_verified'] == 1 ? 'selected' : ''; ?>>Verified</option>
                 </select>
-
-                <!-- Role selection dropdown -->
                 <select name="role_id">
                     <option value="1" <?php echo isset($user_data) && $user_data['role_id'] == 1 ? 'selected' : ''; ?>>User</option>
                     <option value="2" <?php echo isset($user_data) && $user_data['role_id'] == 2 ? 'selected' : ''; ?>>Supplier</option>
                     <option value="3" <?php echo isset($user_data) && $user_data['role_id'] == 3 ? 'selected' : ''; ?>>Banned</option>
                 </select>
-
                 <button type="submit" name="add_user" <?php echo isset($user_data) ? 'style="display:none"' : ''; ?>>Add User</button>
                 <button type="submit" name="update_user" <?php echo isset($user_data) ? '' : 'style="display:none"'; ?>>Update User</button>
             </form>
@@ -184,20 +188,25 @@ if(isset($_GET['delete_user'])) {
                 </thead>
                 <tbody>
                     <?php
-                    // Fetch all users for listing
                     $query = "SELECT * FROM `user`";
                     $result = mysqli_query($conn, $query);
-                    while($user = mysqli_fetch_assoc($result)) {
+                    while ($user = mysqli_fetch_assoc($result)) {
                     ?>
                     <tr>
                         <td><?php echo $user['user_id']; ?></td>
                         <td><?php echo $user['user_name']; ?></td>
                         <td><?php echo $user['email']; ?></td>
-                        <td><?php echo $user['admin'] == 1 ? 'Yes' : 'No'; ?></td>
+                        <td>
+                            <?php
+                            // Display admin role based on the admin field
+                            if ($user['admin'] == 2) echo 'Super Admin';
+                            elseif ($user['admin'] == 1) echo 'Admin';
+                            else echo 'No';
+                            ?>
+                        </td>
                         <td><?php echo $user['is_verified'] == 1 ? 'Yes' : 'No'; ?></td>
                         <td>
                             <?php
-                            // Display role name based on role_id
                             if ($user['role_id'] == 1) echo 'User';
                             elseif ($user['role_id'] == 2) echo 'Supplier';
                             elseif ($user['role_id'] == 3) echo 'Banned';
