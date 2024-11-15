@@ -41,7 +41,7 @@ if (isset($_POST['submit'])) {
 
       // Check if the current time is before the lockout end time
       if ($current_time < $lockout_end) {
-        $formatted_time = $lockout_end->format("g:i A");
+        $formatted_time = $lockout_end->format("g:i:s A");
         $message = "Account is locked. Please try again after $formatted_time.";
       }
     }
@@ -78,7 +78,7 @@ if (isset($_POST['submit'])) {
         if ($failed_attempts >= 5) {
           $lockout_end = clone $current_time;
           $lockout_end->add(new DateInterval("PT{$lockout_minutes}M"));
-          $formatted_time = $lockout_end->format("g:i A");
+          $formatted_time = $lockout_end->format("g:i:s A");
           $message = "Too many failed attempts. Account is locked. Please try again after $formatted_time.";
         } else {
           $remaining_attempts = 5 - $failed_attempts;
