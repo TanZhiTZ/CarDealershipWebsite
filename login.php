@@ -107,7 +107,7 @@ function sendVerificationEmail($email, $token)
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
-    $mail->setFrom('jerrylaw02@gmail.com', 'No-Reply');
+    $mail->setFrom('jerrylaw02@gmail.com', 'Car Dealership Website');
     $mail->addAddress($email);
 
     $mail->isHTML(true);
